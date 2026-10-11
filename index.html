@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Кыргызское такси — Бишкек</title>
-  <meta name="description" content="Кыргызское такси: заказ поездки по Бишкеку. Маршрут на карте, расстояние, время и стоимость.">
+  <title>Белек такси — Бишкек и Иссык-Куль</title>
+  <meta name="description" content="Белек такси: заказ поездки по Бишкеку и Иссык-Кулю — Балыкчы, Чолпон-Ата, Каракол. Маршрут на карте, расстояние, время и стоимость.">
   <meta name="theme-color" content="#d81f2a">
   <!-- Приложение: значок на экране телефона, запуск без адресной строки -->
   <link rel="manifest" href="manifest.webmanifest">
@@ -12,7 +12,7 @@
   <link rel="apple-touch-icon" href="icons/icon-180.png">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Такси">
+  <meta name="apple-mobile-web-app-title" content="Белек такси">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,19 +21,21 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div id="map" aria-label="Карта Бишкека"></div>
+  <div id="map" aria-label="Карта Бишкека и Иссык-Куля"></div>
 
   <div class="brand">
     <span class="brand__mark" aria-hidden="true">
       <svg viewBox="0 0 24 24"><path d="M5 11l1.6-4.2A2 2 0 0 1 8.5 5.5h7a2 2 0 0 1 1.9 1.3L19 11m-14 0h14a2 2 0 0 1 2 2v3.5H3V13a2 2 0 0 1 2-2zm1.5 5.500v1.500m11-1.500v1.500" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </span>
-    <span>Кыргызское такси</span>
+    <span>Белек такси</span>
   </div>
   <button class="install" id="install" type="button" hidden>Установить</button>
 
   <!-- Панель заказа: на телефоне снизу, на компьютере слева -->
   <section class="sheet" id="sheet">
     <div id="orderForm">
+      <!-- Города: нажатие переносит карту в выбранный город -->
+      <div class="cities" id="cities" role="group" aria-label="Город"></div>
       <div class="fields">
         <div class="field field--from">
           <span class="field__dot">A</span>

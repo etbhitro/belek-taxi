@@ -1,5 +1,5 @@
 /* =========================================================
-   Кыргызское такси — прототип заказа поездки
+   Белек такси — прототип заказа поездки
    ========================================================= */
 :root {
   --red:    #d81f2a;
@@ -47,6 +47,10 @@ p { margin: 0; }
   border-radius: var(--radius) var(--radius) 0 0; background: var(--white); box-shadow: var(--shadow);
   max-height: 82vh; overflow-y: auto;
 }
+.cities { display: grid; grid-template-columns: repeat(4, auto); gap: 5px; margin-bottom: 10px; }
+.city { height: 38px; padding: 0 4px; border-radius: 100px; border: 1.5px solid var(--line); background: var(--white); font-size: .8rem; font-weight: 700; white-space: nowrap; cursor: pointer; transition: border-color .2s, background .2s, color .2s; }
+.city:hover { border-color: #b9bdc8; }
+.city[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: #fff; }
 .fields { position: relative; display: grid; gap: 8px; }
 /* пунктир между точками A и B */
 .fields::before { content: ""; position: absolute; left: 27px; top: 40px; bottom: 40px; border-left: 2px dotted #c5c9d3; }

@@ -1,7 +1,17 @@
-// Кыргызское такси — прототип: карта Бишкека, поиск адреса, маршрут и расчёт стоимости.
+// Белек такси — прототип: карта Бишкека и Иссык-Куля, поиск адреса, маршрут и расчёт стоимости.
 (() => {
-  // Город: центр карты и рамка, за пределы которой адреса не ищем
-  const CITY = { center: [42.8746, 74.5698], south: 42.76, west: 74.42, north: 42.97, east: 74.76 };
+  // Регион — Бишкек и Иссык-Куль: рамка, за пределы которой адреса не ищем.
+  // Поездки возможны и внутри города, и между городами.
+  const REGION = { south: 41.9, west: 74.3, north: 43.05, east: 78.9 };
+  // Что показываем, пока город не выбран: от Бишкека до Каракола
+  const LAKE_VIEW = [[42.1, 74.45], [42.95, 78.45]];
+  // Города: центр — куда переносится карта и вокруг чего в первую очередь ищутся адреса
+  const CITIES = [
+    { id: 'bishkek',    name: 'Бишкек',     center: [42.8746, 74.5698], zoom: 13 },
+    { id: 'balykchy',   name: 'Балыкчы',    center: [42.4602, 76.1871], zoom: 14 },
+    { id: 'cholponata', name: 'Чолпон-Ата', center: [42.6494, 77.0822], zoom: 14 },
+    { id: 'karakol',    name: 'Каракол',    center: [42.4907, 78.3936], zoom: 14 },
+  ];
 
   // ТАРИФЫ — черновые цифры для демонстрации, заменить на настоящие.
   // Цена = посадка + км × perKm + минуты × perMin, но не меньше min; округляется до 10 сом.
@@ -25,15 +35,16 @@
   const suggest = $('suggest'), hint = $('hint'), trip = $('trip'), sheet = $('sheet');
   const desktop = window.matchMedia('(min-width: 860px)');
 
-  const state = { from: null, to: null, active: 'from', route: null, tariff: TARIFFS[0].id };
+  const state = { from: null, to: null, active: 'from', route: null, tariff: TARIFFS[0].id, city: null };
   const markers = {};
   let routeLine = null;
 
   // ---------- Карта ----------
   const map = L.map('map', {
-    zoomControl: false, minZoom: 11,
-    maxBounds: [[CITY.south - .12, CITY.west - .2], [CITY.north + .12, CITY.east + .2]],
-  }).setView(CITY.center, 13);
+    zoomControl: false, minZoom: 7,
+    // запас снизу и слева — чтобы маршрут помещался рядом с панелью заказа (на телефоне она снизу, на компьютере слева)
+    maxBounds: [[REGION.south - 1.5, REGION.west - 3], [REGION.north + .3, REGION.east + .5]],
+  }).fitBounds(LAKE_VIEW);
   L.control.zoom({ position: 'topright' }).addTo(map);
   // Плитки карты — openstreetmap.org. Сервер требует, чтобы страница была открыта по адресу http(s)://,
   // а не файлом с диска (иначе 403): локально запускать через start.bat, в интернете работает само.
@@ -41,7 +52,7 @@
     maxZoom: 19, attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   }).addTo(map);
 
-  const inCity = (lat, lon) => lat >= CITY.south && lat <= CITY.north && lon >= CITY.west && lon <= CITY.east;
+  const inRegion = (lat, lon) => lat >= REGION.south && lat <= REGION.north && lon >= REGION.west && lon <= REGION.east;
   const setHint = (text, error = false) => { hint.textContent = text; hint.classList.toggle('is-error', error); hint.hidden = !text; };
 
   // ---------- Адреса ----------
@@ -66,13 +77,15 @@
     if (q.trim().length < 2) { suggest.hidden = true; return; }
     searchTimer = setTimeout(async () => {
       searchAbort = new AbortController();
-      const url = `${API.search}?q=${encodeURIComponent(q)}&limit=6&lang=default&lat=${CITY.center[0]}&lon=${CITY.center[1]}` +
-        `&bbox=${CITY.west},${CITY.south},${CITY.east},${CITY.north}`;
+      // Сначала показываем адреса рядом с выбранным городом (или с тем местом, которое сейчас на карте)
+      const near = state.city ? { lat: state.city.center[0], lng: state.city.center[1] } : map.getCenter();
+      const url = `${API.search}?q=${encodeURIComponent(q)}&limit=6&lang=default&lat=${near.lat}&lon=${near.lng}` +
+        `&bbox=${REGION.west},${REGION.south},${REGION.east},${REGION.north}`;
       try {
         const res = await fetch(url, { signal: searchAbort.signal });
         const items = (await res.json()).features
-          .map(f => ({ lat: f.geometry.coordinates[1], lon: f.geometry.coordinates[0], label: labelOf(f.properties), sub: f.properties.district || f.properties.city || '' }))
-          .filter(i => inCity(i.lat, i.lon));
+          .map(f => ({ lat: f.geometry.coordinates[1], lon: f.geometry.coordinates[0], label: labelOf(f.properties), sub: [f.properties.district, f.properties.city].filter(Boolean).join(', ') }))
+          .filter(i => inRegion(i.lat, i.lon));
         suggest.replaceChildren(...items.map(item => {
           const li = document.createElement('li');
           const b = document.createElement('b'); b.textContent = item.label;
@@ -119,7 +132,7 @@
   };
 
   const pointFromMap = async (which, lat, lon) => {
-    if (!inCity(lat, lon)) { setHint('Пока работаем только в Бишкеке.', true); return; }
+    if (!inRegion(lat, lon)) { setHint('Пока работаем только в Бишкеке и на Иссык-Куле.', true); return; }
     setPoint(which, { lat, lon, label: '…' });
     const label = await reverse(lat, lon);
     if (state[which] && state[which].lat === lat) { state[which].label = label; inputs[which].value = label; }
@@ -130,6 +143,23 @@
     const which = !state.from ? 'from' : !state.to ? 'to' : state.active;
     pointFromMap(which, e.latlng.lat, e.latlng.lng);
   });
+
+  // ---------- Города ----------
+  const remember = id => { try { id ? localStorage.setItem('city', id) : localStorage.removeItem('city'); } catch (e) {} };
+  const renderCities = () => $('cities').replaceChildren(...CITIES.map(c => {
+    const btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'city'; btn.textContent = c.name;
+    btn.setAttribute('aria-pressed', String(c === state.city));
+    btn.addEventListener('click', () => setCity(c));
+    return btn;
+  }));
+  const setCity = (city, move = true) => {
+    state.city = city;
+    remember(city && city.id);
+    renderCities();
+    if (!move) return;
+    if (city) map.setView(city.center, city.zoom); else fit(LAKE_VIEW);
+  };
 
   // ---------- Маршрут и цена ----------
   const priceOf = (t, km, min) => Math.max(t.min, Math.round((t.base + km * t.perKm + min * t.perMin) / 10) * 10);
@@ -222,7 +252,7 @@
     $('orderForm').hidden = false;
     inputs.from.value = inputs.to.value = '';
     clearPoint('to'); clearPoint('from');
-    map.setView(CITY.center, 13);
+    setCity(state.city);
   });
 
   // ---------- Приложение: установка на устройство ----------
@@ -236,8 +266,12 @@
   });
   window.addEventListener('appinstalled', () => { $('install').hidden = true; });
 
-  // Ссылка сразу с маршрутом: ?from=42.8762,74.6118&to=42.8427,74.6122
+  // Ссылка сразу с маршрутом: ?from=42.4602,76.1871&to=42.6494,77.0822
   const params = new URLSearchParams(location.search);
+  // При запуске — город, выбранный в прошлый раз; иначе вся зона работы целиком
+  let saved = null;
+  try { saved = localStorage.getItem('city'); } catch (e) {}
+  setCity(CITIES.find(c => c.id === saved) || null, !params.has('from') && !params.has('to'));
   ['from', 'to'].forEach(which => {
     const [lat, lon] = (params.get(which) || '').split(',').map(Number);
     if (lat && lon) pointFromMap(which, lat, lon);

@@ -1,5 +1,5 @@
-// Кыргызское такси — оболочка приложения открывается и без сети; карта, адреса и маршруты всегда идут из сети.
-const CACHE = 'kt-shell-v1';
+// Белек такси — оболочка приложения открывается и без сети; карта, адреса и маршруты всегда идут из сети.
+const CACHE = 'belek-shell-v3';
 const SHELL = ['./', 'index.html', 'styles.css', 'app.js', 'manifest.webmanifest', 'icons/icon-192.png',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css', 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'];
 
