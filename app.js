@@ -35,6 +35,8 @@
     maxBounds: [[CITY.south - .12, CITY.west - .2], [CITY.north + .12, CITY.east + .2]],
   }).setView(CITY.center, 13);
   L.control.zoom({ position: 'topright' }).addTo(map);
+  // Плитки карты — openstreetmap.org. Сервер требует, чтобы страница была открыта по адресу http(s)://,
+  // а не файлом с диска (иначе 403): локально запускать через start.bat, в интернете работает само.
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19, attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   }).addTo(map);
