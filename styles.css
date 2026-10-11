@@ -36,6 +36,10 @@ p { margin: 0; }
 .brand__mark { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--red); color: var(--yellow); }
 .brand__mark svg { width: 20px; height: 20px; }
 
+.install { position: fixed; z-index: 1100; top: calc(14px + env(safe-area-inset-top)); right: 60px; height: 50px; padding: 0 18px; border: 0; border-radius: 100px; cursor: pointer; background: var(--ink); color: #fff; font-weight: 800; box-shadow: var(--shadow); }
+.install:hover { background: #000; }
+.install[hidden] { display: none; }
+
 /* ---------- Панель заказа ---------- */
 .sheet {
   position: fixed; z-index: 1100; left: 0; right: 0; bottom: 0;

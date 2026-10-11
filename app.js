@@ -225,6 +225,17 @@
     map.setView(CITY.center, 13);
   });
 
+  // ---------- Приложение: установка на устройство ----------
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+  // Кнопка «Установить» появляется, когда браузер готов поставить приложение (Chrome, Edge, Android)
+  let installPrompt = null;
+  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installPrompt = e; $('install').hidden = false; });
+  $('install').addEventListener('click', async () => {
+    $('install').hidden = true;
+    if (installPrompt) { installPrompt.prompt(); installPrompt = null; }
+  });
+  window.addEventListener('appinstalled', () => { $('install').hidden = true; });
+
   // Ссылка сразу с маршрутом: ?from=42.8762,74.6118&to=42.8427,74.6122
   const params = new URLSearchParams(location.search);
   ['from', 'to'].forEach(which => {
