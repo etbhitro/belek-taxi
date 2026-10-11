@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Кыргызское такси — Бишкек</title>
+  <meta name="description" content="Кыргызское такси: заказ поездки по Бишкеку. Маршрут на карте, расстояние, время и стоимость.">
+  <meta name="theme-color" content="#d81f2a">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="map" aria-label="Карта Бишкека"></div>
+
+  <div class="brand">
+    <span class="brand__mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path d="M5 11l1.6-4.2A2 2 0 0 1 8.5 5.5h7a2 2 0 0 1 1.9 1.3L19 11m-14 0h14a2 2 0 0 1 2 2v3.5H3V13a2 2 0 0 1 2-2zm1.5 5.500v1.500m11-1.500v1.500" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </span>
+    <span>Кыргызское такси</span>
+  </div>
+
+  <!-- Панель заказа: на телефоне снизу, на компьютере слева -->
+  <section class="sheet" id="sheet">
+    <div id="orderForm">
+      <div class="fields">
+        <div class="field field--from">
+          <span class="field__dot">A</span>
+          <input id="from" type="search" placeholder="Откуда" autocomplete="off" aria-label="Откуда">
+          <button class="field__btn" id="locate" type="button" title="Моё местоположение" aria-label="Моё местоположение">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.200" fill="currentColor"/><circle cx="12" cy="12" r="7.500" fill="none" stroke="currentColor" stroke-width="1.800"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="currentColor" stroke-width="1.800" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+        <div class="field field--to">
+          <span class="field__dot">B</span>
+          <input id="to" type="search" placeholder="Куда" autocomplete="off" aria-label="Куда">
+        </div>
+      </div>
+      <ul class="suggest" id="suggest" hidden></ul>
+      <p class="hint" id="hint">Введите адрес или нажмите на карту</p>
+
+      <div class="trip" id="trip" hidden>
+        <p class="trip__meta"><b id="km"></b><span id="min"></span></p>
+        <div class="tariffs" id="tariffs"></div>
+        <button class="btn" id="order" type="button"></button>
+      </div>
+    </div>
+
+    <div class="done" id="done" hidden>
+      <h2>Заявка оформлена</h2>
+      <p id="doneText"></p>
+      <p class="done__demo">Это демонстрация: заказ пока никуда не отправляется.</p>
+      <button class="btn btn--ghost" id="again" type="button">Новый заказ</button>
+    </div>
+  </section>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
